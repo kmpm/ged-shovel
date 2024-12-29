@@ -22,22 +22,24 @@ import (
 
 // Define Prometheus metrics
 var (
-	messageCounter = promauto.NewCounterVec(prometheus.CounterOpts{
-		Name: "enp_message_counter",
-		Help: "The total number of messages",
-	}, []string{"status"})
-
 	messageDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "enp_message_duration",
 		Help:    "The duration of messages",
-		Buckets: []float64{0.0005, .001, .005, .01, .025, .05, .1, .25, .5, 1, 2.5},
+		Buckets: []float64{0.00001, 0.00005, 0.0001, 0.0005, .001, .005, .01, .05, .1, .5, 1},
 	}, []string{"status"})
+)
+
+// Define global variables
+var (
+	duration time.Duration
+	count    float64
 )
 
 type RunCmd struct {
 }
 
 func (cmd *RunCmd) Run() error {
+	slog.Info("starting enp")
 	stop := waitfor()
 	wg := &sync.WaitGroup{}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -46,11 +48,24 @@ func (cmd *RunCmd) Run() error {
 	if err != nil {
 		return err
 	}
+	slog.Info("validation schemas loaded")
 
 	nc, err := connect()
 	if err != nil {
 		return err
 	}
+	slog.Info("connected to nats", "servers", nc.Servers())
+
+	ticker := time.NewTicker(1 * time.Minute)
+	go func() {
+		for range ticker.C {
+			avg := float64(duration.Seconds()) / count
+			slog.Info("stats", "count", count, "avg_s", avg)
+			count = 0
+			duration = 0
+		}
+	}()
+	defer ticker.Stop()
 
 	ch := make(chan []byte, 5)
 	wg.Add(1)
@@ -78,10 +93,13 @@ func processMessage(nc *nats.Conn, validator *message.Validator, rawMsg []byte) 
 	status := "published"
 	schema := "unknown"
 	defer func() {
-		messageDuration.WithLabelValues(status).Observe(float64(time.Since(start).Milliseconds()))
-		if time.Since(start) > 1*time.Second {
-			slog.Warn("slow message", "duration", time.Since(start), "status", status, "schema", schema)
+		d := time.Since(start)
+		messageDuration.WithLabelValues(status).Observe(float64(d.Milliseconds()))
+		if d > 1*time.Second {
+			slog.Warn("slow message", "duration", d, "status", status, "schema", schema)
 		}
+		duration += d
+		count++
 	}()
 	deflated, err := message.Deflate(rawMsg)
 	if err != nil {
