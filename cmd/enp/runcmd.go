@@ -36,6 +36,8 @@ var (
 )
 
 type RunCmd struct {
+	Nats        string `help:"NATS server URI" default:"nats://localhost:4222"`
+	NatsContext string `help:"NATS context" default:""`
 }
 
 func (cmd *RunCmd) Run() error {
@@ -46,13 +48,13 @@ func (cmd *RunCmd) Run() error {
 	defer cancel()
 	validator, err := message.NewValidator()
 	if err != nil {
-		return err
+		panic(err)
 	}
 	slog.Info("validation schemas loaded")
 
-	nc, err := connect()
+	nc, err := connect(cmd.Nats, cmd.NatsContext)
 	if err != nil {
-		return err
+		panic(err)
 	}
 	slog.Info("connected to nats", "servers", nc.Servers())
 
@@ -78,6 +80,7 @@ func (cmd *RunCmd) Run() error {
 			err = processMessage(nc, validator, rawMsg)
 			if err != nil {
 				slog.Error("error processing message", "error", err)
+				panic(err)
 			}
 		case <-stop:
 			run = false
@@ -132,8 +135,15 @@ func processMessage(nc *nats.Conn, validator *message.Validator, rawMsg []byte) 
 	return nil
 }
 
-func connect() (*nats.Conn, error) {
-	nc, err := natscontext.Connect("nats_development", nil)
+func connect(uri, context string) (nc *nats.Conn, err error) {
+	if context != "" {
+		nc, err = natscontext.Connect(context, nil)
+	} else {
+		nc, err = nats.Connect(uri)
+	}
+	if err != nil {
+		return nil, err
+	}
 	nc.SetClosedHandler(func(_ *nats.Conn) {
 		slog.Error("connection closed")
 	})

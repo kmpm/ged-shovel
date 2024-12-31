@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -105,13 +106,21 @@ func (v *Validator) GetSchema(schemaURL string) (*jsonschema.Schema, error) {
 		return nil, fmt.Errorf("could not compile schema '%s': %w", schemaURL, err)
 	}
 	v.cache[schemaURL] = sch
-	if err := appendToFile("var/schemas.txt", schemaURL); err != nil {
-		slog.Error("could not write schema to file", "error", err)
-	}
+	// if err := appendToFile("var/schemas.txt", schemaURL); err != nil {
+	// 	slog.Error("could not write schema to file", "error", err)
+	// }
 	return sch, nil
 }
 
 func appendToFile(filename, data string) error {
+	// check if folder exists and create if missing
+	foldername := filepath.Dir(filename)
+	if _, err := os.Stat(foldername); os.IsNotExist(err) {
+		if err := os.Mkdir(foldername, 0755); err != nil {
+			return err
+		}
+	}
+
 	f, err := os.OpenFile(filename, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err

@@ -23,7 +23,8 @@ type cli struct {
 // configure slog logging
 func setupLogging(level string) {
 	opts := &slog.HandlerOptions{
-		Level: slog.LevelInfo,
+		Level:     slog.LevelInfo,
+		AddSource: true,
 	}
 	switch level {
 	case "debug":
