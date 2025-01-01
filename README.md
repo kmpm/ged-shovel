@@ -1,5 +1,6 @@
-# EDDN to Nats Proxy
-Receives messages from EDDN and republish them on a given NATS.io server
+# Go Elite:Dangerous - Shovel
+Receives messages from EDDN and republish them on a given NATS.io server,
+written in Go
 
 
 
@@ -8,8 +9,8 @@ Receives messages from EDDN and republish them on a given NATS.io server
 
 ## Docker
 ```powershell
-docker build -t ged-enp . 
-docker run -d --name enp --network nats --rm ged-enp
+docker build -t ged-shovel .
+docker run -d --name shovel --network nats --rm ged-shovel
 
 
 go install github.com/kevin-cantwell/zlib/cmd/zlib@latest
