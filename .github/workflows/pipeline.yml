@@ -46,6 +46,8 @@ jobs:
       # https://github.com/docker/setup-buildx-action
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          platforms: linux/amd64,linux/arm64
 
 
       # Login against a Docker registry except on PR
@@ -70,7 +72,7 @@ jobs:
             # output 0.1.2
             type=semver,pattern={{version}}
             # output 0.1
-            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}.{{minor}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.0') }}
             # disabled if major zero
             type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
             # output latest
