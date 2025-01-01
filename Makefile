@@ -19,7 +19,7 @@ tidy:
 
 .PHONY: run
 run: 
-	go run $(call FIXPATH,./cmd/enp/) --metrics ":2112"
+	go run $(call FIXPATH,./cmd/ged-shovel/) --metrics ":2112"
 
 
 .PHONY: test
@@ -29,7 +29,7 @@ test:
 
 .PHONY: build
 build: $(DIRS)
-	cd dist & go build $(call FIXPATH,../cmd/enp/)
+	cd dist & go build $(call FIXPATH,../cmd/ged-shovel/)
 
 
 $(DIRS):

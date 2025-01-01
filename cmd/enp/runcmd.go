@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kmpm/enp/internal/eddn"
-	"github.com/kmpm/enp/internal/message"
-	"github.com/kmpm/enp/internal/sink"
-	"github.com/kmpm/enp/public/models"
+	"github.com/kmpm/ged-shovel/internal/eddn"
+	"github.com/kmpm/ged-shovel/internal/message"
+	"github.com/kmpm/ged-shovel/internal/sink"
+	"github.com/kmpm/ged-shovel/public/models"
 
 	"github.com/nats-io/jsm.go/natscontext"
 	"github.com/nats-io/nats.go"

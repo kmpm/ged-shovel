@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/kmpm/enp/public/models"
+	"github.com/kmpm/ged-shovel/public/models"
 )
 
 func NewZlibReader(r *bytes.Reader) (io.ReadCloser, error) {

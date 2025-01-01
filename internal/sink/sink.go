@@ -3,7 +3,7 @@ package sink
 import (
 	"strings"
 
-	"github.com/kmpm/enp/public/models"
+	"github.com/kmpm/ged-shovel/public/models"
 	"github.com/nats-io/nats.go"
 )
 

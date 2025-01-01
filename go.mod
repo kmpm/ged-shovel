@@ -1,4 +1,4 @@
-module github.com/kmpm/enp
+module github.com/kmpm/ged-showel
 
 go 1.23.4
 

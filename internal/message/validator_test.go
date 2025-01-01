@@ -6,7 +6,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/kmpm/enp/public/models"
+	"github.com/kmpm/ged-shovel/public/models"
 )
 
 func newTestValidator(t *testing.T) *Validator {
