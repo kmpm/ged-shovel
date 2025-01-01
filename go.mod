@@ -1,6 +1,6 @@
-module github.com/kmpm/ged-showel
+module github.com/kmpm/ged-shovel
 
-go 1.23.4
+go 1.21
 
 require (
 	github.com/alecthomas/kong v1.6.0
