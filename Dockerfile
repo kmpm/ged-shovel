@@ -11,6 +11,7 @@ FROM scratch
 WORKDIR /app
 COPY --from=builder /app/ged-shovel ./
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+COPY --from=builder /etc/services /etc/services
 ENV USER=appuser
 ENTRYPOINT ["./ged-shovel"]
-CMD ["run", "--metrics=':2112'", "--nats=nats://nats:4222"]
+CMD ["run", "--metrics=:2112", "--nats=nats://nats:4222"]

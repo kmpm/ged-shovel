@@ -57,10 +57,17 @@ func main() {
 	ctx := kong.Parse(&cli)
 	setupLogging(cli.Loglevel)
 	if cli.Metrics != "" {
+
 		go func() {
+			slog.Info("metrics enabled", "address", cli.Metrics)
 			http.Handle("/metrics", promhttp.Handler())
-			http.ListenAndServe(cli.Metrics, nil)
+			err := http.ListenAndServe(cli.Metrics, nil)
+			if err != nil {
+				slog.Error("metrics server error", "error", err)
+			}
 		}()
+	} else {
+		slog.Info("metrics disabled")
 	}
 	err := ctx.Run()
 	if err != nil {
