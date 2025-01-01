@@ -23,7 +23,7 @@ import (
 // Define Prometheus metrics
 var (
 	messageDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
-		Name:    "enp_message_duration",
+		Name:    "ged_shovel_message_duration",
 		Help:    "The duration of messages",
 		Buckets: []float64{0.00001, 0.00005, 0.0001, 0.0005, .001, .005, .01, .05, .1, .5, 1},
 	}, []string{"status"})
@@ -41,7 +41,7 @@ type RunCmd struct {
 }
 
 func (cmd *RunCmd) Run() error {
-	slog.Info("starting enp")
+	slog.Info("Running ged-shovel")
 	stop := waitfor()
 	wg := &sync.WaitGroup{}
 	ctx, cancel := context.WithCancel(context.Background())
