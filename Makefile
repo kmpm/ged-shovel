@@ -56,6 +56,10 @@ test:
 	go test ./...
 
 
+.PHONY: image
+image:
+	docker build -t ged-shovel .
+
 .PHONY: run
 run:
 	go run $(call FIXPATH,./cmd/ged-shovel/) --metrics ":2112"
