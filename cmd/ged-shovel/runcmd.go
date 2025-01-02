@@ -24,7 +24,7 @@ var (
 	messageDuration = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "ged_shovel_message_duration",
 		Help:    "The duration of messages",
-		Buckets: []float64{.0000001, .000001, .00001, .0001, .001, .01, .1, 1},
+		Buckets: []float64{.00001, .00005, .0001, .0005, .001, .005, .01, .1, 1},
 	}, []string{"status"})
 
 	messagesCounter = promauto.NewCounterVec(prometheus.CounterOpts{
