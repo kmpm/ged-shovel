@@ -97,8 +97,8 @@ func processMessage(nc *nats.Conn, validator *message.Validator, rawMsg []byte) 
 	schema := "unknown"
 	defer func() {
 		d := time.Since(start)
-		messageDuration.WithLabelValues(status).Observe(float64(d.Milliseconds()))
-		if d > 1*time.Second {
+		messageDuration.WithLabelValues(status).Observe(float64(d.Seconds()))
+		if d > 500*time.Millisecond {
 			slog.Warn("slow message", "duration", d, "status", status, "schema", schema)
 		}
 		duration += d
