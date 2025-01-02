@@ -11,7 +11,6 @@ import (
 
 	"github.com/kmpm/ged-shovel/internal/eddn"
 	"github.com/kmpm/ged-shovel/internal/message"
-	"github.com/kmpm/ged-shovel/internal/sink"
 	"github.com/kmpm/ged-shovel/public/models"
 
 	"github.com/nats-io/jsm.go/natscontext"
@@ -27,6 +26,17 @@ var (
 		Help:    "The duration of messages",
 		Buckets: []float64{.0000001, .000001, .00001, .0001, .001, .01, .1, 1},
 	}, []string{"status"})
+
+	messagesCounter = promauto.NewCounterVec(prometheus.CounterOpts{
+		Name: "ged_shovel_messages_per_subject",
+		Help: "The number of messages per subject",
+	}, []string{"subject", "software", "version"})
+
+	messageSize = promauto.NewHistogramVec(prometheus.HistogramOpts{
+		Name:    "ged_shovel_message_size",
+		Help:    "The size of actual messages excl. headers",
+		Buckets: []float64{100, 500, 1000, 1500, 2000, 2500, 3000, 3500},
+	}, []string{"subject"})
 )
 
 // Define global variables
@@ -127,11 +137,28 @@ func processMessage(nc *nats.Conn, validator *message.Validator, rawMsg []byte) 
 		return fmt.Errorf("error validating message: %w", err)
 	}
 	// slog.Debug("received message", "schema", decoded.SchemaRef, "software", decoded.Header.SoftwareName)
-	err = sink.Publish(nc, &decoded, rawMsg)
+	err = publish(nc, &decoded, rawMsg)
 	if err != nil {
 		status = "publish_error"
 		return fmt.Errorf("error publishing message: %w", err)
 	}
+
+	return nil
+}
+
+func publish(nc *nats.Conn, inbound *models.EDDN, raw []byte) error {
+	// create subject from message schema
+	subject := message.Subjectify(inbound.SchemaRef)
+	// encode message and compress using zlib
+	outbound := nats.NewMsg(subject)
+	outbound.Data = raw
+	outbound.Header.Add("Content-Encoding", "zlib")
+	err := nc.PublishMsg(outbound)
+	if err != nil {
+		return err
+	}
+	messageSize.WithLabelValues(subject).Observe(float64(len(inbound.Message)))
+	messagesCounter.WithLabelValues(subject, inbound.Header.SoftwareName, inbound.Header.SoftwareVersion).Inc()
 	return nil
 }
 

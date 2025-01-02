@@ -5,9 +5,17 @@ import (
 	"compress/zlib"
 	"encoding/json"
 	"io"
+	"strings"
 
 	"github.com/kmpm/ged-shovel/public/models"
 )
+
+func Subjectify(schemaRef string) string {
+	//schema is a url, so we need to remove schema and the slashes and replace them with dots
+	//e.g. https://eddn.edcd.io/schemas/journal/1.json -> eddn.journal.1
+	parts := strings.Split(schemaRef, "/")
+	return "eddn." + strings.Join(parts[4:], ".")
+}
 
 func NewZlibReader(r *bytes.Reader) (io.ReadCloser, error) {
 	return zlib.NewReader(r)
