@@ -35,7 +35,7 @@ var (
 	messageSize = promauto.NewHistogramVec(prometheus.HistogramOpts{
 		Name:    "ged_shovel_message_size",
 		Help:    "The size of actual messages excl. headers",
-		Buckets: []float64{100, 500, 1000, 1500, 2000, 2500, 3000, 3500},
+		Buckets: []float64{100, 200, 400, 600, 800, 1000, 2000, 4000, 6000},
 	}, []string{"subject"})
 )
 
