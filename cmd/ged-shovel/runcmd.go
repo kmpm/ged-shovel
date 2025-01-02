@@ -58,7 +58,7 @@ func (cmd *RunCmd) Run() error {
 	}
 	slog.Info("connected to nats", "servers", nc.Servers())
 
-	ticker := time.NewTicker(1 * time.Minute)
+	ticker := time.NewTicker(5 * time.Minute)
 	go func() {
 		for range ticker.C {
 			avg := float64(duration.Seconds()) / count
