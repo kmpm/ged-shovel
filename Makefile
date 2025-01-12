@@ -67,8 +67,8 @@ build: $(OUTDIR)
 release: clean $(OUTDIR) build release_$(GOOS)
 
 
-.PHONY: release_Linux
-release_Linux:
+.PHONY: release_linux
+release_linux:
 	cd $(OUTDIR) ; tar -czf ../$(LONGNAME).tar.gz *
 
 
