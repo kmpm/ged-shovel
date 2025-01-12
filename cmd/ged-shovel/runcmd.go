@@ -39,12 +39,6 @@ var (
 	}, []string{"subject"})
 )
 
-// Define global variables
-var (
-	duration time.Duration
-	count    float64
-)
-
 type RunCmd struct {
 	Nats        string `help:"NATS server URI" default:"nats://localhost:4222"`
 	NatsContext string `help:"NATS context" default:""`
@@ -67,17 +61,6 @@ func (cmd *RunCmd) Run() error {
 		panic(err)
 	}
 	slog.Info("connected to nats", "servers", nc.Servers())
-
-	ticker := time.NewTicker(5 * time.Minute)
-	go func() {
-		for range ticker.C {
-			avg := float64(duration.Seconds()) / count
-			slog.Info("stats", "count", count, "avg_s", avg)
-			count = 0
-			duration = 0
-		}
-	}()
-	defer ticker.Stop()
 
 	ch := make(chan []byte, 5)
 	wg.Add(1)
@@ -111,8 +94,6 @@ func processMessage(nc *nats.Conn, validator *message.Validator, rawMsg []byte) 
 		if d > 500*time.Millisecond {
 			slog.Warn("slow message", "duration", d, "status", status, "schema", schema)
 		}
-		duration += d
-		count++
 	}()
 	deflated, err := message.Deflate(rawMsg)
 	if err != nil {
