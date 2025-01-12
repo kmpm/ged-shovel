@@ -5,7 +5,7 @@ ifeq ($(OS),Windows_NT)
 	MKDIR = mkdir
 else
 	FIXPATH = $1
-	RM = rm -f
+	RM = rm -rf
 	MKDIR = mkdir -p
 endif
 
