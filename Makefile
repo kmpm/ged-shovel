@@ -5,9 +5,18 @@ ifeq ($(OS),Windows_NT)
 	MKDIR = mkdir
 else
 	FIXPATH = $1
-	RM = rm -f
+	RM = rm -rf
 	MKDIR = mkdir -p
 endif
+
+GOEXE:=$(shell go env GOEXE)
+GOOS:=$(shell go env GOOS)
+GOARCH:=$(shell go env GOARCH)
+
+NAME:=ged-shovel
+OUTDIR:=dist
+LONGNAME=$(NAME)-$(GOOS)-$(GOARCH)
+BINNAME:=$(call FIXPATH,dist/$(LONGNAME)$(GOEXE))
 
 .PHONY: help
 help:
@@ -24,6 +33,8 @@ help:
 	@echo "make help"
 	@echo "       show this help message"
 
+$(OUTDIR):
+	$(MKDIR) $@
 
 .PHONY: tidy
 tidy:
@@ -41,25 +52,46 @@ audit:
 	go run golang.org/x/vuln/cmd/govulncheck@latest ./...
 
 
-.PHONY: no-dirty
-no-dirty:
-	git diff --exit-code
-
-
-.PHONY: build
-build:
-	go build $(call FIXPATH,./cmd/ged-shovel/)
-
-
 .PHONY: test
 test:
 	go test ./...
 
 
-.PHONY: image
-image:
-	docker build -t ged-shovel .
+.PHONY: build
+build: $(OUTDIR)
+	go build -o $(BINNAME) $(call FIXPATH,./cmd/$(NAME)/)
+	@echo "Built $(BINNAME)"
+
+
+.PHONY: release
+release: clean $(OUTDIR) build release_$(GOOS)
+
+
+.PHONY: release_linux
+release_linux:
+	cd $(OUTDIR) ; tar -czf ../$(LONGNAME).tar.gz *
+
+
+.PHONY: release_windows
+release_windows:
+	zip -j $(LONGNAME).zip  $(OUTDIR)/*
+
 
 .PHONY: run
 run:
-	go run $(call FIXPATH,./cmd/ged-shovel/) --metrics ":2112"
+	go run $(call FIXPATH,./cmd/$(NAME)/) --metrics ":2112"
+
+
+.PHONY: image
+image:
+	docker build -t $(NAME) .
+
+
+.PHONY: no-dirty
+no-dirty:
+	git diff --exit-code
+
+
+.PHONY: clean
+clean:
+	$(RM) $(call FIXPATH,$(OUTDIR))
