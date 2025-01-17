@@ -2,6 +2,8 @@ package eddn
 
 import (
 	"context"
+	"errors"
+	"io"
 	"log/slog"
 	"os"
 	"sync"
@@ -43,6 +45,13 @@ func Subscribe(ctx context.Context, wg *sync.WaitGroup, ch chan []byte) {
 		msg, err := sub.Recv()
 		if err != nil {
 			slog.Error("could not receive message", "error", err)
+			// if eof then panic
+			if errors.Is(err, io.EOF) {
+				slog.Error("EOF received, exiting")
+				panic(err)
+			}
+			slog.Error("other error, panic")
+			panic(err)
 		} else {
 			switch msg.Type {
 			case zmq4.UsrMsg:
